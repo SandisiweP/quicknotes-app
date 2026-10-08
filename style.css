@@ -40,8 +40,16 @@ header p {
     margin-bottom: 1.5rem;
 }
 
-.form-group {
-    margin-bottom: 1rem;
+/* Horizontal Flexbox layout for desktop form controls */
+.card form {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.card form .form-group {
+    flex: 1;
+    margin-bottom: 0;
     display: flex;
     flex-direction: column;
 }
@@ -72,6 +80,7 @@ button[type="submit"] {
     border-radius: 4px;
     font-size: 1rem;
     cursor: pointer;
+    height: 42px; /* Aligns smoothly with inputs */
 }
 
 button[type="submit"]:hover {
@@ -141,8 +150,23 @@ footer {
     font-size: 0.9rem;
 }
 
+/* Media query to adapt form controls into a vertical column on mobile screens */
 @media (max-width: 600px) {
     .main-container {
         padding: 0 0.5rem;
+    }
+
+    .card form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .card form .form-group {
+        margin-bottom: 1rem;
+    }
+
+    button[type="submit"] {
+        width: 100%;
+        height: auto;
     }
 }

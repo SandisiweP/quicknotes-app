@@ -1,12 +1,12 @@
 let notes = [];
 
-const noteForm = document.getElementById("note-form");
-const noteInput = document.getElementById("note-input");
-const noteCategory = document.getElementById("note-category");
-const errorMessage = document.getElementById("error-message");
-const notesList = document.getElementById("notes-list");
-const noteCount = document.getElementById("note-count");
-const searchInput = document.getElementById("search-input");
+const noteForm = document.querySelector("#note-form");
+const noteInput = document.querySelector("#note-input");
+const noteCategory = document.querySelector("#note-category");
+const errorMessage = document.querySelector("#error-message");
+const notesList = document.querySelector("#notes-list");
+const noteCount = document.querySelector("#note-count");
+const searchInput = document.querySelector("#search-input");
 
 // Load notes from localStorage on startup
 function loadNotes() {
@@ -34,7 +34,7 @@ function updateCountText() {
     }
 }
 
-// Render notes to DOM with search filtering
+// Render notes to DOM using createElement and textContent
 function renderNotes() {
     const query = searchInput.value.toLowerCase().trim();
     
@@ -45,7 +45,9 @@ function renderNotes() {
     notesList.innerHTML = "";
 
     if (filtered.length === 0 && notes.length > 0) {
-        notesList.innerHTML = "<li>No notes match your search.</li>";
+        const li = document.createElement("li");
+        li.textContent = "No notes match your search.";
+        notesList.appendChild(li);
         updateCountText();
         return;
     }
@@ -54,25 +56,35 @@ function renderNotes() {
         const li = document.createElement("li");
         li.className = `note-card category-${note.category}`;
 
-        li.innerHTML = `
-            <p class="note-text">${escapeHtml(note.text)}</p>
-            <div class="note-meta">
-                <span><strong>Category:</strong> ${note.category} | <em>${note.createdAt}</em></span>
-                <button class="delete-btn" onclick="deleteNote(${note.id})">Delete</button>
-            </div>
-        `;
+        const p = document.createElement("p");
+        p.className = "note-text";
+        p.textContent = note.text; // Safe text assignment preventing XSS
+
+        const metaDiv = document.createElement("div");
+        metaDiv.className = "note-meta";
+
+        const span = document.createElement("span");
+        span.textContent = `Category: ${note.category} | ${note.createdAt}`;
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.className = "delete-btn";
+        deleteBtn.textContent = "Delete";
+        
+        // Bind addEventListener directly instead of inline onclick
+        deleteBtn.addEventListener("click", () => {
+            deleteNote(note.id);
+        });
+
+        metaDiv.appendChild(span);
+        metaDiv.appendChild(deleteBtn);
+
+        li.appendChild(p);
+        li.appendChild(metaDiv);
+
         notesList.appendChild(li);
     });
 
     updateCountText();
-}
-
-// Basic helper to prevent HTML injection
-function escapeHtml(text) {
-    return text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
 }
 
 // Form submission handler
@@ -81,7 +93,6 @@ noteForm.addEventListener("submit", (e) => {
     const text = noteInput.value;
     const trimmed = text.trim();
 
-    // Validation checks
     if (trimmed === "") {
         errorMessage.textContent = "Please type a note first.";
         return;
@@ -91,7 +102,6 @@ noteForm.addEventListener("submit", (e) => {
         return;
     }
 
-    // Clear error on valid submission
     errorMessage.textContent = "";
 
     const newNote = {
@@ -109,11 +119,11 @@ noteForm.addEventListener("submit", (e) => {
 });
 
 // Delete individual note
-window.deleteNote = function(id) {
+function deleteNote(id) {
     notes = notes.filter(note => note.id !== id);
     saveNotes();
     renderNotes();
-};
+}
 
 // Search listener
 searchInput.addEventListener("input", () => {
